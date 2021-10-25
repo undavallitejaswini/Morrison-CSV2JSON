@@ -1,117 +1,133 @@
+# Python program to convert csv file to json format
 import csv
 import json
+import sys
 
-def checking(list_dict,name):
-    if list_dict:
-        for i in list_dict:
-            if name in i.values():
-                return True
-    return False
 
-with open("data.csv",'r') as csv_file:
-    r=csv.reader(csv_file)
-    json_out=[]
-    temp_dict={}
-    for i,j in enumerate(r):
-        if i==0:
-            header=j
-            #print(header)
-        else:
-            a=j
-            if any(s.strip() for s in a):
-                if checking(json_out,a[0]):
-                    if 'children' in json_out[-1].keys():
+class CsvToJson:
+    def __init__(self):
+        """
+        Initialization of the class and reading the csv file
+        """
+        try:
+            # CSV file opening and reading
+            self.csv_file = open("data.csv", 'r')
+            self.input_file = csv.reader(self.csv_file)
+            self.json_out = []
+        except exception as e:
+            print("CSV  File doesn't exist")
+            sys.exit()
 
-                        if  not checking(json_out[-1]['children'],a[3]):
+    def checking(self, list_dict, name):
+        """
+        Function to check  whether elements present in json or not
+        """
+        try:
+            if list_dict:
+                for element in list_dict:
+                    if name in element.values():
+                        return True
+            return False
+        except exception as e:
+            print("Some error occurred")
+            sys.exit()
 
-                            m = json_out[-1]
-                            if 'children' in m.keys():
-                                if checking(m['children'], a[3]):
-                                    continue
-                                else:
-
-                                    for k in range(len(a[3:6])):
-                                        k=k+3
-                                        row=a[k]
-                                        temp_dict[header[k]] = row
-                                    m['children'].append(temp_dict)
-                                    temp_dict = {}
-                            else:
-                                m['children'] = []
-                                for k,row in enumerate(a[3:6]):
-                                    k=k+3
-                                    temp_dict[header[k]] = row
-                                m['children'].append(temp_dict)
-                                #print(m)
-                                temp_dict = {}
-                        print(a[6])
-
-                        if  a[6]:
-                            x = m['children'][-1]
-                            if 'children' in x.keys():
-                                if checking(x['children'], a[6]):
-                                    continue
-                                else:
-                                    for k in range(len(a[6:9])):
-                                        k = k + 6
-                                        row = a[k]
-                                        temp_dict[header[k]] = row
-                                    x['children'].append(temp_dict)
-                                    temp_dict = {}
-                            else:
-                                x['children'] = []
-                                for k, row in enumerate(a[6:9]):
-                                    k = k + 6
-                                    temp_dict[header[k]] = row
-                                x['children'].append(temp_dict)
-                                # print(m)
-                                temp_dict = {}
-
-                    else:
-                        if a[3]:
-                            m = json_out[-1]
-                            if 'children' in m.keys():
-                                if checking(m['children'], a[3]):
-                                    continue
-                                else:
-
-                                    for k in range(len(a[3:6])):
-                                        k = k + 3
-                                        row = a[k]
-                                        temp_dict[header[k]] = row
-                                    m['children'].append(temp_dict)
-                                    temp_dict = {}
-                            else:
-                                m['children'] = []
-                                for k, row in enumerate(a[3:6]):
-                                    k = k + 3
-                                    temp_dict[header[k]] = row
-                                m['children'].append(temp_dict)
-                                # print(m)
-                                temp_dict = {}
+    def csv_to_json_conversion(self):
+        """
+        Function to convert CSV to json
+        :return: Json
+        """
+        try:
+            temp_dict = {}
+            header = None
+            last_element = None
+            # Reading csv file column wise
+            for idx, element in enumerate(self.input_file):
+                # Taking out the header line
+                if idx == 0:
+                    header = element
                 else:
-                    if a[0]:
-                        for k in range(len(a[:3])):
+                    # Reading each and every column
+                    if any(s.strip() for s in element):
+                        # Calling checking function to check if the element is present in Json
+                        if self.checking(self.json_out, element[0]):
+                            if 'children' in self.json_out[-1].keys():
+                                if not self.checking(self.json_out[-1]['children'], element[3]):
+                                    last_element = self.json_out[-1]
+                                    if 'children' in last_element.keys():
+                                        if self.checking(last_element['children'], element[3]):
+                                            continue
+                                        else:
+                                            for col in range(len(element[3:6])):
+                                                col = col + 3
+                                                row = element[col]
+                                                temp_dict[header[col]] = row
+                                            last_element['children'].append(temp_dict)
+                                            temp_dict = {}
+                                    else:
+                                        last_element['children'] = []
+                                        for ind, row in enumerate(element[3:6]):
+                                            ind = ind + 3
+                                            temp_dict[header[ind]] = row
+                                        last_element['children'].append(temp_dict)
+                                        temp_dict = {}
+                                if element[6]:
+                                    last_element1 = last_element['children'][-1]
+                                    if 'children' in last_element1.keys():
+                                        if self.checking(last_element1['children'], element[6]):
+                                            continue
+                                        else:
+                                            for col in range(len(element[6:9])):
+                                                col = col + 6
+                                                row = element[col]
+                                                temp_dict[header[col]] = row
+                                            last_element1['children'].append(temp_dict)
+                                            temp_dict = {}
+                                    else:
+                                        last_element1['children'] = []
+                                        for ind, row in enumerate(element[6:9]):
+                                            ind = ind + 6
+                                            temp_dict[header[ind]] = row
+                                        last_element1['children'].append(temp_dict)
+                                        temp_dict = {}
+                            else:
+                                if element[3]:
+                                    last_element = self.json_out[-1]
+                                    if 'children' in last_element.keys():
+                                        if self.checking(last_element['children'], element[3]):
+                                            continue
+                                        else:
+                                            for col in range(len(element[3:6])):
+                                                col = col + 3
+                                                row = element[col]
+                                                temp_dict[header[col]] = row
+                                            element['children'].append(temp_dict)
+                                            temp_dict = {}
+                                    else:
+                                        last_element['children'] = []
+                                        for ind, row in enumerate(element[3:6]):
+                                            ind = ind + 3
+                                            temp_dict[header[ind]] = row
+                                        last_element['children'].append(temp_dict)
+                                        temp_dict = {}
+                        else:
+                            if element[0]:
+                                for col in range(len(element[:3])):
+                                    row = element[col]
+                                    temp_dict[header[col]] = row
+                                self.json_out.append(temp_dict)
+                                temp_dict = {}
+            # closing csv file
+            self.csv_file.close()
+            # writing the output to output file
+            with open("output.json", 'w') as json_file:
+                json_file.write(json.dumps(self.json_out, indent=3))
 
-                            row=a[k]
-                            temp_dict[header[k]]=row
-                        json_out.append(temp_dict)
-
-                        temp_dict={}
-    with open("output.json", 'w') as json_file:
-        json_file.write(json.dumps(json_out,indent=3))
-
-    print(json_out)
+        except exception as e:
+            print("Some error occurred")
+            sys.exit()
 
 
-
-
-
-
-
-
-
-
-
-
-
+# Object creation#
+c2j = CsvToJson()
+c2j.csv_to_json_conversion()
